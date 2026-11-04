@@ -255,7 +255,7 @@ export const register: Register = on => {
     return (
       <Box flexDirection="column">
         {version && (
-          <Box justifyContent="flex-end">
+          <Box justifyContent="flex-end" marginBottom={1}>
             <Text dimColor>v{version}</Text>
           </Box>
         )}
