@@ -19,54 +19,58 @@ const version = () => {
 
 type Stored = Query & { sessionID: string }
 
-// The server loads this plugin once per location, all in one process: the queries live at module level
-// so every copy reads and writes the same list. The first copy loads them and saves them.
-let queries: Stored[] = []
-let ready: Promise<void> | undefined
-let persist: ((value: Stored[]) => void) | undefined
-
 export default Plugin.define({
   id: "active-skills",
   async setup(ctx) {
-    ready ??= (async () => {
-      try {
-        const saved = await ctx.storage.get(KEY)
-        if (Array.isArray(saved)) queries = saved as Stored[]
-      } catch {}
+    const instance = Math.random().toString(36).slice(2, 6)
 
-      persist = value => void ctx.storage.set(KEY, value as never).catch(() => {})
-    })()
-    await ready
-
-    const save = () => persist?.(queries.slice(-KEEP))
-
-    const add = (sessionID: string, skill: Skill) => {
-      const last = [...queries].reverse().find(q => q.sessionID === sessionID)
-      if (!last || last.skills.some(s => s.name === skill.name)) return
-      last.skills.push(skill)
-      save()
+    // The server loads this plugin once per location, each with its own copy of the module, so the list
+    // cannot live in a variable: the plugin storage is the one place every copy reads and writes.
+    const load = async () => {
+      const saved = await ctx.storage.get(KEY).catch(() => undefined)
+      return Array.isArray(saved) ? (saved as Stored[]) : []
+    }
+    // One write at a time per copy, so a prompt and its skill calls do not overwrite each other.
+    let chain: Promise<unknown> = Promise.resolve()
+    const change = (edit: (list: Stored[]) => Stored[]) => {
+      chain = chain
+        .then(async () => ctx.storage.set(KEY, edit(await load()).slice(-KEEP) as never))
+        .catch(() => {})
+      return chain
     }
 
+    const add = (sessionID: string, skill: Skill) =>
+      change(list => {
+        const last = [...list].reverse().find(q => q.sessionID === sessionID)
+        if (last && !last.skills.some(s => s.name === skill.name)) last.skills.push(skill)
+        return list
+      })
+
     await ctx.rpc.register(Skills, {
-      list: async () => ({ version: version(), queries: queries.slice(-KEEP).map(({ sessionID: _, ...q }) => q) }),
+      list: async () => {
+        const list = await load()
+        return { version: version(), queries: list.slice(-KEEP).map(({ sessionID: _, ...q }) => q) }
+      },
       clear: async () => {
-        queries = []
-        save()
+        await change(() => [])
         return {}
       },
     })
 
     await ctx.session.hook("prompt", async event => {
-      queries.push({
-        id: String(event.messageID),
-        sessionID: String(event.sessionID),
-        prompt: event.prompt.text.replace(/^"|"$/g, "").slice(0, 60),
-        skills: [],
-      })
+      await change(list => [
+        ...list,
+        {
+          id: String(event.messageID),
+          sessionID: String(event.sessionID),
+          prompt: event.prompt.text.replace(/^"|"$/g, "").slice(0, 60),
+          skills: [],
+        },
+      ])
 
       // A skill the person typed arrives with the prompt, with no tool call.
       const typed = (event.prompt.skills ?? []) as unknown[]
-      if (typed.length === 0) return save()
+      if (typed.length === 0) return
 
       const known = await ctx.skill.list().catch(() => undefined)
       const list = (known as { data?: { id: string; name: string; content?: string }[] } | undefined)?.data ?? []
@@ -75,17 +79,17 @@ export default Plugin.define({
         const id =
           typeof entry === "string" ? entry : String((entry as { id?: string }).id ?? (entry as { name?: string }).name)
         const info = list.find(s => s.id === id || s.name === id)
-        add(String(event.sessionID), { name: info?.name ?? id, tokens: estimate(info?.content ?? ""), via: "user" })
+        await add(String(event.sessionID), { name: info?.name ?? id, tokens: estimate(info?.content ?? ""), via: "user" })
       }
     })
 
     // The model loads a skill with the `skill` tool; its result carries the whole text.
-    await ctx.tool.hook("execute.after", event => {
+    await ctx.tool.hook("execute.after", async event => {
       if (event.tool !== "skill" || event.status !== "completed") return
 
       const output = (event.result as { output?: { name?: string; output?: string } } | undefined)?.output
       const id = String((event.input as { id?: string } | undefined)?.id ?? "")
-      add(String(event.sessionID), {
+      await add(String(event.sessionID), {
         name: output?.name ?? id,
         tokens: estimate(output?.output ?? JSON.stringify(event.result ?? "")),
         via: "model",

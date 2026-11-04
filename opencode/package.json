@@ -1,6 +1,6 @@
 {
   "name": "opencode-active-skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenCode 2 plugin: a side panel listing the skills used in each query, with estimated tokens",
   "license": "MIT",
   "type": "module",
