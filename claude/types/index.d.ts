@@ -3,6 +3,6 @@ export type Query = { id: number; prompt: string; skills: Skill[] }
 
 declare module 'claude-code' {
   interface PluginState {
-    'active-skills': { queries: Shaped<Query[]>; expanded: Shaped<number[]>; loaded: Shaped<string[]> }
+    'active-skills': { queries: Shaped<Query[]>; collapsed: Shaped<number[]>; loaded: Shaped<string[]> }
   }
 }

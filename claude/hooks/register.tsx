@@ -14,9 +14,9 @@ const loaded = atom({ plugin: 'active-skills', key: 'loaded' } as const, [], {
   shape: 'loaded-1',
 })
 
-// Cards start folded: only the ones the person opened are stored.
-const expanded = atom({ plugin: 'active-skills', key: 'expanded' } as const, [], {
-  shape: 'expanded-1',
+// Cards start open: only the ones the person folded are stored.
+const collapsed = atom({ plugin: 'active-skills', key: 'collapsed' } as const, [], {
+  shape: 'collapsed-1',
 })
 
 // shortcut: ~4 characters per token, not a real tokenizer; swap if exact counts matter.
@@ -218,7 +218,7 @@ export const register: Register = on => {
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const list = await read($, queries)
-    const opened = await read($, expanded)
+    const folded = await read($, collapsed)
     const t = await texts($)
     const version = await pluginVersion($)
     const room = Math.max(1, Math.floor(((e.viewport?.rows ?? 24) - 6) / 4))
@@ -246,11 +246,11 @@ export const register: Register = on => {
 
     const clear = async () => {
       await update($, queries, () => [])
-      await update($, expanded, () => [])
+      await update($, collapsed, () => [])
     }
 
     const toggle = (id: number) =>
-      update($, expanded, ids => (ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]))
+      update($, collapsed, ids => (ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]))
 
     return (
       <Box flexDirection="column">
@@ -272,7 +272,7 @@ export const register: Register = on => {
         {list.length === 0 && <Text dimColor>{t.empty}</Text>}
         {shown.map(q => {
             const { flat, groups } = groupSkills(q.skills)
-            const isFolded = !opened.includes(q.id)
+            const isFolded = folded.includes(q.id)
 
             return (
               <Box flexDirection="column" borderStyle="round" paddingX={1} marginTop={1}>

@@ -6,7 +6,7 @@ Un mod para Claude Code que abre un panel lateral con las skills que se han usad
 
 ## Qué muestra
 
-- **Una card por consulta**, con el total de tokens arriba (`~7.4k tok`) y el texto de la consulta. Las cards vienen plegadas; al pulsar la cabecera se despliegan.
+- **Una card por consulta**, con el total de tokens arriba (`~7.4k tok`) y el texto de la consulta. Las cards vienen desplegadas; al pulsar la cabecera se pliegan.
 - **Las skills de cada consulta**, agrupadas por plugin (`superpowers`, `ponytail`…) y ordenadas de más a menos pesadas, con su subtotal.
 - **Color por peso:** amarillo desde ~1,5k tokens y rojo desde ~3k en cada skill. En la cabecera de la card, un 🟡 o un 🔴 a partir de ~4k y ~8k.
 - **Cómo se cargó cada skill:** `manual` (la escribiste tú como `/nombre`), `modelo` (la invocó el modelo) o `auto` (otra vía, por ejemplo una precarga).
