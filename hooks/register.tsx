@@ -96,6 +96,17 @@ const systemLanguage = ($: Host) =>
     }
   })())
 
+// The version shown in the pane is the one in plugin.json, read once, so there is a single place to bump it.
+let versionOnce: Promise<string> | undefined
+const pluginVersion = ($: {
+  fs: { read: (path: string) => Promise<string> }
+  plugin: { root: string }
+}) =>
+  (versionOnce ??= $.fs
+    .read(`${$.plugin.root}/.claude-plugin/plugin.json`)
+    .then(text => String(JSON.parse(text).version ?? ''))
+    .catch(() => ''))
+
 // Claude Code's own `language` setting ("spanish", "es", ...) wins; unset, the system language decides.
 // Anything that is not Spanish is English.
 const texts = async ($: Host) => {
@@ -209,6 +220,7 @@ export const register: Register = on => {
     const list = await read($, queries)
     const opened = await read($, expanded)
     const t = await texts($)
+    const version = await pluginVersion($)
     const room = Math.max(1, Math.floor(((e.viewport?.rows ?? 24) - 6) / 4))
     const all = list.reduce((t, q) => t + sum(q.skills), 0)
     const used = list.filter(q => q.skills.length > 0).length
@@ -247,7 +259,10 @@ export const register: Register = on => {
             {t.session} <Text color={total(all)}>~{fmt(all)} tok</Text>
             <Text dimColor> · {used} {used === 1 ? t.query : t.queries} {t.withSkills}</Text>
           </Text>
-          <Button key="clear" label={t.clear} onPress={clear} />
+          <Box>
+            {version && <Text dimColor>v{version} </Text>}
+            <Button key="clear" label={t.clear} onPress={clear} />
+          </Box>
         </Box>
         {plugins.length > 0 && (
           <Text dimColor>{plugins.map(([p, n]) => p + " ~" + fmt(n)).join(" · ")}</Text>
