@@ -6,7 +6,7 @@ Un plugin para **OpenCode 2 Desktop** que añade un panel lateral con las skills
 
 ## Qué muestra
 
-- **Una card por consulta**, con el texto de la consulta a la izquierda y el total de tokens a la derecha. Al pulsar la cabecera se despliega la lista de skills.
+- **Una card por consulta**, con el texto de la consulta a la izquierda y el total de tokens a la derecha. Las cards vienen desplegadas; al pulsar la cabecera se pliegan.
 - **Las skills de cada consulta**, de más a menos pesadas, con su peso en tokens y cómo se cargaron: `modelo` (la cargó el modelo con su herramienta `skill`) o `manual` (la escribiste tú en el prompt).
 - **Color por peso:** amarillo desde ~1,5k tokens y rojo desde ~3k en cada skill; en el total de una card, desde ~4k y ~8k.
 - **Resumen de la sesión** arriba, con el total y cuántas consultas usaron skills, la versión del plugin y un botón **Limpiar**.

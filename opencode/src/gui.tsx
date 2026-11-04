@@ -54,7 +54,8 @@ export default Plugin.define({
   setup(ctx) {
     const ui = ctx.ui
     const [data, setData] = createSignal<{ version: string; queries: Query[] }>({ version: "", queries: [] })
-    const [opened, setOpened] = createSignal<string[]>([])
+    // Cards start open: only the ones the person folded are kept.
+    const [folded, setFolded] = createSignal<string[]>([])
 
     // `ctx.client` changes when the server restarts, so it is read at call time.
     const refresh = () => void ctx.client.rpc(Skills).list({}).then(setData).catch(() => {})
@@ -62,8 +63,8 @@ export default Plugin.define({
     const timer = setInterval(refresh, 1500)
     onCleanup(() => clearInterval(timer))
 
-    const toggle = (id: string) => setOpened(ids => (ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]))
-    const clear = () => void ctx.client.rpc(Skills).clear({}).then(() => (setOpened([]), refresh())).catch(() => {})
+    const toggle = (id: string) => setFolded(ids => (ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]))
+    const clear = () => void ctx.client.rpc(Skills).clear({}).then(() => (setFolded([]), refresh())).catch(() => {})
 
     ctx.add(Style, css)
 
@@ -113,10 +114,10 @@ export default Plugin.define({
               {query => (
                 <div class="card">
                   <button class="head" onClick={() => toggle(query.id)}>
-                    <span class="prompt">{opened().includes(query.id) ? "▾" : "▸"} {query.prompt}</span>
+                    <span class="prompt">{folded().includes(query.id) ? "▸" : "▾"} {query.prompt}</span>
                     <span class={`tokens ${total(sum(query))}`}>~{fmt(sum(query))} tok</span>
                   </button>
-                  <Show when={opened().includes(query.id)}>
+                  <Show when={!folded().includes(query.id)}>
                     <div class="skills">
                       <Show when={query.skills.length === 0}>
                         <span class="muted">{ctx.t("none")}</span>
