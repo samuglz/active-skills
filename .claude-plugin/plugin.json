@@ -1,0 +1,1 @@
+{ "name": "active-skills", "version": "0.1.0", "description": "Shows in a side pane which skills were used in each query", "types": "./types/index.d.ts" }
