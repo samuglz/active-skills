@@ -254,15 +254,17 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="column">
+        {version && (
+          <Box justifyContent="flex-end">
+            <Text dimColor>v{version}</Text>
+          </Box>
+        )}
         <Box justifyContent="space-between">
           <Text bold>
             {t.session} <Text color={total(all)}>~{fmt(all)} tok</Text>
             <Text dimColor> · {used} {used === 1 ? t.query : t.queries} {t.withSkills}</Text>
           </Text>
-          <Box>
-            {version && <Text dimColor>v{version} </Text>}
-            <Button key="clear" label={t.clear} onPress={clear} />
-          </Box>
+          <Button key="clear" label={t.clear} onPress={clear} />
         </Box>
         {plugins.length > 0 && (
           <Text dimColor>{plugins.map(([p, n]) => p + " ~" + fmt(n)).join(" · ")}</Text>
