@@ -1,0 +1,4 @@
+node_modules/
+.probe-archive/
+.opencode/skills/test-*/
+opencode.jsonc

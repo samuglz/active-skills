@@ -1,0 +1,35 @@
+{
+  "name": "opencode-active-skills",
+  "version": "0.1.0",
+  "description": "OpenCode 2 plugin: a side panel listing the skills used in each query, with estimated tokens",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./rpc": "./src/rpc.ts",
+    "./gui-experimental": "./dist/gui-experimental.cjs"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@opencode/plugin": "*",
+    "@types/node": "^26.6.6",
+    "solid-js": "*",
+    "typescript": "*",
+    "vite": "*",
+    "vite-plugin-solid": "^2.11.15"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samuglz/active-skills.git",
+    "directory": "opencode"
+  },
+  "homepage": "https://github.com/samuglz/active-skills/tree/main/opencode#readme"
+}

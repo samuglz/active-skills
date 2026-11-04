@@ -1,5 +1,5 @@
 {
   "name": "active-skills",
   "owner": { "name": "samuglz" },
-  "plugins": [{ "name": "active-skills", "source": "./" }]
+  "plugins": [{ "name": "active-skills", "source": "./claude" }]
 }
