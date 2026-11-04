@@ -58,6 +58,10 @@ El idioma (español o inglés) sale del ajuste `language` de Claude Code (`"lang
 - **Probado en la app de escritorio.** En terminal no se ha probado cómo se dibuja el panel.
 - **Un detalle de la interfaz:** el color del total de la cabecera no se aplica dentro de un botón, por eso se refuerza con el emoji.
 
+## Licencia
+
+[MIT](LICENSE)
+
 ## Desarrollo
 
 ```
